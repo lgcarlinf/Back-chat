@@ -1,22 +1,30 @@
 name: scp files
+
 on:
   push:
     tags:
-      - "release*"
+      - "copy*"
 
 jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
+    env:
+      github_repo: ${{ github.repository }}
     steps:
       - uses: actions/checkout@v4
+      - name: Set repository name
+        run: echo "REPOSITORY_NAME=$(echo $GITHUB_REPOSITORY | grep -o '[^/]*$')" >> $GITHUB_ENV
+      - name: Print repository name
+        run: echo "Repository Name $REPOSITORY_NAME"
       - name: copy file via ssh password
         uses: appleboy/scp-action@v0.1.7
+
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
           port: ${{ secrets.PORT }}
           source: .
-          target: /root/personal
+          target: "/root/personal/${{ env.REPOSITORY_NAME }}/"
           overwrite: true
